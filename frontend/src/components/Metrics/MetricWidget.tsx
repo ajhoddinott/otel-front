@@ -31,7 +31,7 @@ export function MetricWidget({ config, onRemove }: MetricWidgetProps) {
   const query: AggregationRequest = useMemo(() => {
     const endTime = new Date()
     const startTime = new Date(endTime.getTime() - config.timeRangeMinutes * 60 * 1000)
-    
+
     return {
       metric_name: config.metricName,
       aggregation_type: config.aggregationType,
@@ -195,4 +195,3 @@ export function MetricWidget({ config, onRemove }: MetricWidgetProps) {
     </div>
   )
 }
-

@@ -25,7 +25,7 @@ export function Metrics() {
       const saved = localStorage.getItem(DASHBOARD_STORAGE_KEY)
       if (saved) {
         const parsedWidgets = JSON.parse(saved)
-        
+
         // Check if widgets have the new structure (metricName property)
         if (parsedWidgets.length > 0 && !parsedWidgets[0].metricName) {
           // Old structure detected - clear it
@@ -52,7 +52,7 @@ export function Metrics() {
     if (isInitialLoad.current) {
       return
     }
-    
+
     // Mark as unsaved when widgets change
     if (widgets.length > 0) {
       setIsSaved(false)

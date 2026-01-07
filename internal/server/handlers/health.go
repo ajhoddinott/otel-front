@@ -22,4 +22,3 @@ func (h *HealthHandler) HandleHealth(c *gin.Context) {
 		"timestamp": time.Now().Unix(),
 	})
 }
-

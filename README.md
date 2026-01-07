@@ -224,7 +224,7 @@ Options:
 go run scripts/send_otlp_data.go --count 20
 
 # Or continuously (for live dashboard testing)
-while true; do 
+while true; do
   go run scripts/send_otlp_data.go --count 10
   sleep 5
 done

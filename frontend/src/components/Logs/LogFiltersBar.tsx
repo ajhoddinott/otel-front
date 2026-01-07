@@ -47,7 +47,7 @@ export function LogFiltersBar({
   const handleTimeRangeChange = (minutes: number) => {
     const endTime = new Date()
     const startTime = new Date(endTime.getTime() - minutes * 60 * 1000)
-    
+
     onFiltersChange({
       ...filters,
       start_time: startTime.toISOString(),
@@ -264,4 +264,3 @@ export function LogFiltersBar({
     </div>
   )
 }
-

@@ -2,7 +2,7 @@ class OtelViewer < Formula
   desc "Lightweight OpenTelemetry viewer for local development"
   homepage "https://github.com/mesaglio/otel-viewer"
   version "0.1.0"
-  
+
   on_macos do
     if Hardware::CPU.arm?
       url "https://github.com/mesaglio/otel-viewer/releases/download/v#{version}/otel-viewer-darwin-arm64.tar.gz"
@@ -46,23 +46,22 @@ class OtelViewer < Formula
   def caveats
     <<~EOS
       OTEL Viewer installed successfully!
-      
+
       Start the viewer:
         $ otel-viewer
-      
+
       Browser opens automatically at http://localhost:8000
-      
+
       OTLP endpoints ready:
         HTTP: http://localhost:4318
         gRPC: localhost:4317
-      
+
       Send test data:
         $ git clone https://github.com/mesaglio/otel-viewer
         $ cd otel-viewer
         $ go run scripts/send_otlp_data.go --count 20
-      
+
       Documentation: https://github.com/mesaglio/otel-viewer
     EOS
   end
 end
-

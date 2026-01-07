@@ -178,4 +178,3 @@ func getIntQuery(c *gin.Context, key string, defaultVal int) int {
 	}
 	return defaultVal
 }
-

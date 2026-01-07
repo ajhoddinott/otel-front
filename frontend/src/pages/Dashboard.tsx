@@ -49,8 +49,8 @@ export function Dashboard() {
 
       {/* OpenTelemetry Configuration */}
       <div className="mb-8">
-        <OTelExportConfig 
-          httpPort={4318} 
+        <OTelExportConfig
+          httpPort={4318}
           grpcPort={4317}
           hasData={stats.totalTraces > 0 || stats.totalLogs > 0 || stats.totalMetrics > 0}
         />

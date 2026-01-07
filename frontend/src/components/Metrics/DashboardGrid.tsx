@@ -26,5 +26,3 @@ export function DashboardGrid({ widgets, onRemoveWidget }: DashboardGridProps) {
     </div>
   )
 }
-
-

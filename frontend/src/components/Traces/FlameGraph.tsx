@@ -44,7 +44,7 @@ function buildFlameData(spans: Span[]): FlameNode {
       operationMap.set(key, { duration: 0, count: 0, spans: [] })
     }
     const data = operationMap.get(key)!
-    
+
     // Sum all durations for this operation
     data.duration += span.duration_ms
     data.count += 1
@@ -181,4 +181,3 @@ export function FlameGraph({ spans, onSpanClick }: FlameGraphProps) {
     </div>
   )
 }
-

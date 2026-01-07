@@ -80,6 +80,13 @@ func TransformTraces(td ptrace.Traces) ([]*store.Trace, error) {
 					trace := traces[traceID]
 					trace.SpanCount++
 
+					// If this is the root span (no parent), update the trace's operation name and service name
+					// This handles the case where child spans arrive before the root span
+					if convertedSpan.ParentSpanID == nil {
+						trace.OperationName = span.Name()
+						trace.ServiceName = serviceName
+					}
+
 					// Update start/end times
 					if convertedSpan.StartTime.Before(trace.StartTime) {
 						trace.StartTime = convertedSpan.StartTime

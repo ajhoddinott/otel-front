@@ -16,4 +16,3 @@ func CORS() func(http.Handler) http.Handler {
 	})
 	return c.Handler
 }
-

@@ -7,8 +7,8 @@ interface OTelExportConfigProps {
   hasData?: boolean // If true, component starts collapsed
 }
 
-export function OTelExportConfig({ 
-  httpPort = 4318, 
+export function OTelExportConfig({
+  httpPort = 4318,
   grpcPort = 4317,
   hasData = false
 }: OTelExportConfigProps) {
@@ -137,4 +137,3 @@ export OTEL_EXPORTER_OTLP_PROTOCOL="grpc"`
     </div>
   )
 }
-
