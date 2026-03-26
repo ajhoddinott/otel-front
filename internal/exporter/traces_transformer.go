@@ -154,7 +154,7 @@ func convertLinks(links ptrace.SpanLinkSlice) []store.SpanLink {
 // attributesToMap converts OTLP attributes to a map
 func attributesToMap(attrs pcommon.Map) map[string]interface{} {
 	if attrs.Len() == 0 {
-		return nil
+		return make(map[string]interface{})
 	}
 
 	result := make(map[string]interface{}, attrs.Len())
