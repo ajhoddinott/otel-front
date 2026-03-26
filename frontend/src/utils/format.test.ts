@@ -42,4 +42,3 @@ describe('formatDurationPrecise', () => {
     expect(formatDurationPrecise(0)).toBe('0.000ms')
   })
 })
-

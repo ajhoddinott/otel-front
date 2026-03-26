@@ -19,5 +19,3 @@ export function formatDurationPrecise(durationMs: number): string {
   }
   return `${durationMs.toFixed(3)}ms`
 }
-
-

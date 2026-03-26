@@ -54,4 +54,3 @@ echo ""
 echo "Installation will be:"
 echo "  brew tap mesaglio/otel-viewer"
 echo "  brew install otel-viewer"
-

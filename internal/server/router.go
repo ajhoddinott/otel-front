@@ -46,4 +46,3 @@ func SetupRouter(store *store.Store, logger *zap.Logger) *gin.Engine {
 
 	return router
 }
-

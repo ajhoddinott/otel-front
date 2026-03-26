@@ -118,4 +118,3 @@ func (h *MetricsHandler) GetServices(c *gin.Context) {
 		"count":    len(services),
 	})
 }
-

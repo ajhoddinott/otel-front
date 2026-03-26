@@ -226,4 +226,3 @@ export function WaterfallView({ spans, onSpanClick }: WaterfallViewProps) {
     </div>
   )
 }
-

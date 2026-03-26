@@ -123,11 +123,11 @@ export function MetricChart({
               const index = context.dataIndex
               const value = context.parsed.y
               if (value === null || value === undefined) return ''
-              
+
               const unit = data[index]?.unit || ''
               const metricName = data[index]?.metric_name || 'Value'
               const aggregation = data[index]?.aggregation_type || ''
-              
+
               return [
                 `${value.toFixed(2)} ${unit}`.trim(),
                 `${metricName} (${aggregation})`,

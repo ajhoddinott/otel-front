@@ -21,8 +21,10 @@ export function SpanDetailsPanel({ span, onClose }: SpanDetailsPanelProps) {
 
   // Format timestamp with microsecond precision
   const formatTimestamp = (timestamp: string): string => {
+    if (!timestamp) return 'N/A'
     const date = new Date(timestamp)
-    const time = date.toLocaleTimeString('en-US', { 
+    if (isNaN(date.getTime())) return 'Invalid'
+    const time = date.toLocaleTimeString('en-US', {
       hour12: false,
       hour: '2-digit',
       minute: '2-digit',
@@ -151,8 +153,8 @@ export function SpanDetailsPanel({ span, onClose }: SpanDetailsPanelProps) {
           </div>
         </div>
 
-        {/* Attributes */}
-        {Object.keys(span.attributes).length > 0 && (
+        {/* Attributes - FIX: Check if attributes exists before accessing */}
+        {span.attributes && Object.keys(span.attributes).length > 0 && (
           <div>
             <h3 className="text-sm font-semibold text-gray-700 mb-3">Attributes</h3>
             <div className="bg-gray-50 rounded-lg p-4">
@@ -216,4 +218,3 @@ export function SpanDetailsPanel({ span, onClose }: SpanDetailsPanelProps) {
     </div>
   )
 }
-

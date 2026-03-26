@@ -299,7 +299,7 @@ export function TraceComparison({ traces, onClose }: TraceComparisonProps) {
                         <td colSpan={5} className="px-4 py-4 bg-gray-50">
                           <div className="space-y-4">
                             <h4 className="text-sm font-semibold text-gray-700">Attributes Comparison</h4>
-                            
+
                             {attributes.length === 0 ? (
                               <p className="text-sm text-gray-500">No attributes to compare</p>
                             ) : (
@@ -379,4 +379,3 @@ export function TraceComparison({ traces, onClose }: TraceComparisonProps) {
     </div>
   )
 }
-

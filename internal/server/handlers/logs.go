@@ -85,4 +85,3 @@ func (h *LogsHandler) GetLogsByTraceID(c *gin.Context) {
 		"count": len(logs),
 	})
 }
-

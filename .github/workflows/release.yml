@@ -231,7 +231,7 @@ jobs:
           DARWIN_AMD64_SHA=$(grep "Darwin_x86_64" ../dist/checksums.txt | awk '{print $1}')
           LINUX_ARM64_SHA=$(grep "Linux_arm64" ../dist/checksums.txt | awk '{print $1}')
           LINUX_AMD64_SHA=$(grep "Linux_x86_64" ../dist/checksums.txt | awk '{print $1}')
-  
+
           CLEAN_VERSION="${VERSION#v}"
 
           cat > otel-front.rb <<EOF

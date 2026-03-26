@@ -98,4 +98,3 @@ describe('LogFiltersBar', () => {
     expect(screen.getByText('Active filters:')).toBeInTheDocument()
   })
 })
-

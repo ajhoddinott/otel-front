@@ -54,7 +54,7 @@ export function LogTable({ logs, searchQuery, onCopyLog }: LogTableProps) {
 
   const Row = ({ index, style }: { index: number; style: React.CSSProperties }) => {
     const log = logs[index]
-    
+
     return (
       <div
         style={style}
@@ -97,7 +97,7 @@ export function LogTable({ logs, searchQuery, onCopyLog }: LogTableProps) {
             <div className="text-sm text-gray-900">
               {highlightText(log.body, searchQuery)}
             </div>
-            
+
             {/* Trace link */}
             {log.trace_id && (
               <div className="mt-1 flex items-center gap-2">
@@ -164,4 +164,3 @@ export function LogTable({ logs, searchQuery, onCopyLog }: LogTableProps) {
     </div>
   )
 }
-

@@ -135,5 +135,3 @@ export function AlertsPanel({ alerts, onDismiss }: AlertsPanelProps) {
     </div>
   )
 }
-
-

@@ -74,10 +74,10 @@ describe('QueryBuilder', () => {
 
     // Find the select with "AVG" and change it
     const selects = screen.getAllByRole('combobox')
-    const aggregationSelect = selects.find(select => 
+    const aggregationSelect = selects.find(select =>
       select.textContent?.includes('AVG')
     )
-    
+
     if (aggregationSelect) {
       fireEvent.change(aggregationSelect, { target: { value: 'sum' } })
       expect(aggregationSelect).toHaveValue('sum')
@@ -87,4 +87,3 @@ describe('QueryBuilder', () => {
     }
   })
 })
-
