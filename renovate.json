@@ -4,6 +4,7 @@
   "schedule": ["before 9am on monday"],
   "timezone": "America/Argentina/Buenos_Aires",
   "dependencyDashboard": true,
+  "minimumReleaseAge": "14 days",
   "packageRules": [
     {
       "description": "Group all GitHub Actions together",
