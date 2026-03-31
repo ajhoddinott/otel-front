@@ -1,0 +1,55 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "schedule": ["before 9am on monday"],
+  "timezone": "America/Argentina/Buenos_Aires",
+  "dependencyDashboard": true,
+  "packageRules": [
+    {
+      "description": "Group all GitHub Actions together",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "automerge": false,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Group npm dependencies (non-major)",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "npm dependencies (non-major)",
+      "automerge": false,
+      "automergeType": "pr"
+    },
+    {
+      "description": "npm major updates: individual PR for manual review",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "npm major updates",
+      "automerge": false
+    },
+    {
+      "description": "Group Go dependencies (non-major)",
+      "matchManagers": ["gomod"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "Go dependencies (non-major)",
+      "automerge": false,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Go major updates: individual PR for manual review",
+      "matchManagers": ["gomod"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    },
+    {
+      "description": "Docker base images: individual PR for manual review",
+      "matchManagers": ["dockerfile"],
+      "groupName": "Docker base images",
+      "automerge": false
+    }
+  ],
+  "npm": {
+    "fileMatch": ["^frontend/package\\.json$"]
+  },
+  "ignorePaths": ["**/node_modules/**"]
+}
