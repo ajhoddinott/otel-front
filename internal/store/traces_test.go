@@ -281,6 +281,242 @@ func TestGetServices(t *testing.T) {
 	}
 }
 
+func TestInsertTrace_MissingGrandparent(t *testing.T) {
+	store := setupTestStore(t)
+	defer store.Close()
+
+	ctx := context.Background()
+	now := time.Now()
+
+	// Child span Ok (1) first, parent span Unset (0) second, parent's parent missing
+	trace := &Trace{
+		TraceID:       "trace-root-test",
+		ServiceName:   "child-svc",
+		OperationName: "SELECT db.items",
+		StartTime:     now.Add(-5 * time.Millisecond),
+		EndTime:       now,
+		DurationMs:    5,
+		SpanCount:     2,
+		ErrorCount:    0,
+		StatusCode:    0,
+		Spans: []Span{
+			{
+				SpanID:        "span-child",
+				TraceID:       "trace-root-test",
+				ParentSpanID:  strPtr("span-parent"),
+				ServiceName:   "child-svc",
+				OperationName: "SELECT db.items",
+				SpanKind:      "client",
+				StartTime:     now.Add(-3 * time.Millisecond),
+				EndTime:       now.Add(-1 * time.Millisecond),
+				DurationMs:    2,
+				StatusCode:    1,
+			},
+			{
+				SpanID:        "span-parent",
+				TraceID:       "trace-root-test",
+				ParentSpanID:  strPtr("remote-span-999"),
+				ServiceName:   "parent-svc",
+				OperationName: "GET /api/items",
+				SpanKind:      "server",
+				StartTime:     now.Add(-5 * time.Millisecond),
+				EndTime:       now,
+				DurationMs:    5,
+				StatusCode:    0,
+			},
+		},
+	}
+
+	if err := store.Traces.InsertTrace(ctx, trace); err != nil {
+		t.Fatalf("Failed to insert trace: %v", err)
+	}
+
+	retrieved, err := store.Traces.GetTraceByID(ctx, "trace-root-test")
+	if err != nil {
+		t.Fatalf("Failed to get trace: %v", err)
+	}
+
+	// Operation/Service/Status from parent (local root)
+	if retrieved.OperationName != "GET /api/items" {
+		t.Errorf("Expected operation_name 'GET /api/items', got %q", retrieved.OperationName)
+	}
+	if retrieved.ServiceName != "parent-svc" {
+		t.Errorf("Expected service_name 'parent-svc', got %q", retrieved.ServiceName)
+	}
+	if retrieved.StatusCode != 0 {
+		t.Errorf("Expected status_code 0 (parent Unset), got %d", retrieved.StatusCode)
+	}
+}
+
+func TestInsertTrace_LaterBatch(t *testing.T) {
+	store := setupTestStore(t)
+	defer store.Close()
+
+	ctx := context.Background()
+	now := time.Now()
+
+	// Batch 1: child
+	batch1 := &Trace{
+		TraceID:       "trace-batch-test",
+		ServiceName:   "child-svc",
+		OperationName: "SELECT db.items",
+		StartTime:     now.Add(-3 * time.Millisecond),
+		EndTime:       now.Add(-1 * time.Millisecond),
+		DurationMs:    2,
+		SpanCount:     1,
+		ErrorCount:    0,
+		StatusCode:    0,
+		Spans: []Span{
+			{
+				SpanID:        "span-child-b",
+				TraceID:       "trace-batch-test",
+				ParentSpanID:  strPtr("span-parent-b"),
+				ServiceName:   "child-svc",
+				OperationName: "SELECT db.items",
+				SpanKind:      "client",
+				StartTime:     now.Add(-3 * time.Millisecond),
+				EndTime:       now.Add(-1 * time.Millisecond),
+				DurationMs:    2,
+				StatusCode:    2,
+			},
+		},
+	}
+
+	if err := store.Traces.InsertTrace(ctx, batch1); err != nil {
+		t.Fatalf("Failed to insert batch 1: %v", err)
+	}
+
+	after1, err := store.Traces.GetTraceByID(ctx, "trace-batch-test")
+	if err != nil {
+		t.Fatalf("Failed to get trace after batch 1: %v", err)
+	}
+
+	// child is the only span
+	if after1.OperationName != "SELECT db.items" {
+		t.Errorf("After batch 1: expected operation 'SELECT db.items', got %q", after1.OperationName)
+	}
+	if after1.ServiceName != "child-svc" {
+		t.Errorf("After batch 1: expected service 'child-svc', got %q", after1.ServiceName)
+	}
+	if after1.StatusCode != 2 {
+		t.Errorf("After batch 1: expected status_code 2 (child Error), got %d", after1.StatusCode)
+	}
+
+	// Batch 2: parent
+	batch2 := &Trace{
+		TraceID:       "trace-batch-test",
+		ServiceName:   "parent-svc",
+		OperationName: "GET /api/items",
+		StartTime:     now.Add(-5 * time.Millisecond),
+		EndTime:       now,
+		DurationMs:    5,
+		SpanCount:     2,
+		ErrorCount:    0,
+		StatusCode:    0,
+		Spans: []Span{
+			{
+				SpanID:        "span-parent-b",
+				TraceID:       "trace-batch-test",
+				ParentSpanID:  strPtr("remote-span-999"),
+				ServiceName:   "parent-svc",
+				OperationName: "GET /api/items",
+				SpanKind:      "server",
+				StartTime:     now.Add(-5 * time.Millisecond),
+				EndTime:       now,
+				DurationMs:    5,
+				StatusCode:    0,
+			},
+		},
+	}
+
+	if err := store.Traces.InsertTrace(ctx, batch2); err != nil {
+		t.Fatalf("Failed to insert batch 2: %v", err)
+	}
+
+	after2, err := store.Traces.GetTraceByID(ctx, "trace-batch-test")
+	if err != nil {
+		t.Fatalf("Failed to get trace after batch 2: %v", err)
+	}
+
+	// parent is the local root
+	if after2.OperationName != "GET /api/items" {
+		t.Errorf("After batch 2: expected operation 'GET /api/items', got %q", after2.OperationName)
+	}
+	if after2.ServiceName != "parent-svc" {
+		t.Errorf("After batch 2: expected service 'parent-svc', got %q", after2.ServiceName)
+	}
+	if after2.StatusCode != 0 {
+		t.Errorf("After batch 2: expected status_code 0 (parent Unset), got %d", after2.StatusCode)
+	}
+}
+
+func TestInsertTrace_ParentsDiffer(t *testing.T) {
+	store := setupTestStore(t)
+	defer store.Close()
+
+	ctx := context.Background()
+	now := time.Now()
+
+	// Two spans, both parents missing; earliest wins
+	trace := &Trace{
+		TraceID:       "trace-fallback-test",
+		ServiceName:   "later-svc",
+		OperationName: "later-op",
+		StartTime:     now.Add(-5 * time.Millisecond),
+		EndTime:       now,
+		DurationMs:    5,
+		SpanCount:     2,
+		ErrorCount:    0,
+		StatusCode:    0,
+		Spans: []Span{
+			{
+				SpanID:        "span-later",
+				TraceID:       "trace-fallback-test",
+				ParentSpanID:  strPtr("external-1"),
+				ServiceName:   "later-svc",
+				OperationName: "later-op",
+				SpanKind:      "server",
+				StartTime:     now.Add(-2 * time.Millisecond),
+				EndTime:       now,
+				DurationMs:    2,
+				StatusCode:    1,
+			},
+			{
+				SpanID:        "span-earlier",
+				TraceID:       "trace-fallback-test",
+				ParentSpanID:  strPtr("external-2"),
+				ServiceName:   "earlier-svc",
+				OperationName: "earlier-op",
+				SpanKind:      "server",
+				StartTime:     now.Add(-5 * time.Millisecond),
+				EndTime:       now.Add(-1 * time.Millisecond),
+				DurationMs:    4,
+				StatusCode:    2,
+			},
+		},
+	}
+
+	if err := store.Traces.InsertTrace(ctx, trace); err != nil {
+		t.Fatalf("Failed to insert trace: %v", err)
+	}
+
+	retrieved, err := store.Traces.GetTraceByID(ctx, "trace-fallback-test")
+	if err != nil {
+		t.Fatalf("Failed to get trace: %v", err)
+	}
+
+	// Operation/Service/Status from earliest
+	if retrieved.OperationName != "earlier-op" {
+		t.Errorf("Expected operation_name 'earlier-op', got %q", retrieved.OperationName)
+	}
+	if retrieved.ServiceName != "earlier-svc" {
+		t.Errorf("Expected service_name 'earlier-svc', got %q", retrieved.ServiceName)
+	}
+	if retrieved.StatusCode != 2 {
+		t.Errorf("Expected status_code 2 (earlier Error), got %d", retrieved.StatusCode)
+	}
+}
+
 func strPtr(s string) *string {
 	return &s
 }

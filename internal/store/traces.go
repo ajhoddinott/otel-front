@@ -86,6 +86,7 @@ func (ts *TracesStore) InsertTrace(ctx context.Context, trace *Trace) error {
 			duration_ms, span_count, error_count, status_code, attributes)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT (trace_id) DO UPDATE SET
+			start_time = EXCLUDED.start_time,
 			end_time = EXCLUDED.end_time,
 			duration_ms = EXCLUDED.duration_ms,
 			span_count = EXCLUDED.span_count,
@@ -102,6 +103,29 @@ func (ts *TracesStore) InsertTrace(ctx context.Context, trace *Trace) error {
 		if err := ts.insertSpan(ctx, tx, &span); err != nil {
 			return fmt.Errorf("failed to insert span: %w", err)
 		}
+	}
+
+	// Update trace summary
+	// - local root: parent_span_id NULL or not delivered; earliest wins)
+	// - operation_name, service_name, status_code: from local root
+	_, err = tx.ExecContext(ctx, `
+		WITH local_root AS (
+			SELECT s.operation_name, s.service_name, s.status_code
+			FROM spans s
+			WHERE s.trace_id = ?
+			AND (s.parent_span_id IS NULL
+				OR s.parent_span_id NOT IN (
+					SELECT s2.span_id FROM spans s2 WHERE s2.trace_id = ?))
+			ORDER BY s.start_time ASC LIMIT 1
+		)
+		UPDATE traces SET
+			operation_name = COALESCE((SELECT operation_name FROM local_root), operation_name),
+			service_name = COALESCE((SELECT service_name FROM local_root), service_name),
+			status_code = COALESCE((SELECT status_code FROM local_root), status_code)
+		WHERE trace_id = ?
+	`, trace.TraceID, trace.TraceID, trace.TraceID)
+	if err != nil {
+		return fmt.Errorf("failed to update trace summary from spans: %w", err)
 	}
 
 	if err := tx.Commit(); err != nil {
