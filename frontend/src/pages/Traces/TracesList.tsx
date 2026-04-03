@@ -121,7 +121,7 @@ export function TracesList() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             <div className="flex-shrink-0">
-                              {trace.has_errors ? (
+                              {trace.status_code === 2 ? (
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                   Error
                                 </span>

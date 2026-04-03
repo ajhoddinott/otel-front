@@ -8,7 +8,7 @@ export interface Trace {
   end_time: string
   duration_ms: number
   span_count: number
-  has_errors: boolean
+  status_code: number
 }
 
 export interface Span {
