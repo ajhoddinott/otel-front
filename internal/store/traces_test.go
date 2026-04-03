@@ -336,15 +336,15 @@ func TestInsertTrace_MissingGrandparent(t *testing.T) {
 		t.Fatalf("Failed to get trace: %v", err)
 	}
 
-	// Operation/Service/Status from parent (local root)
+	// Operation/Service from local root, status from max()
 	if retrieved.OperationName != "GET /api/items" {
 		t.Errorf("Expected operation_name 'GET /api/items', got %q", retrieved.OperationName)
 	}
 	if retrieved.ServiceName != "parent-svc" {
 		t.Errorf("Expected service_name 'parent-svc', got %q", retrieved.ServiceName)
 	}
-	if retrieved.StatusCode != 0 {
-		t.Errorf("Expected status_code 0 (parent Unset), got %d", retrieved.StatusCode)
+	if retrieved.StatusCode != 1 {
+		t.Errorf("Expected status_code 1 (max of Ok=1, Unset=0), got %d", retrieved.StatusCode)
 	}
 }
 
@@ -445,8 +445,8 @@ func TestInsertTrace_LaterBatch(t *testing.T) {
 	if after2.ServiceName != "parent-svc" {
 		t.Errorf("After batch 2: expected service 'parent-svc', got %q", after2.ServiceName)
 	}
-	if after2.StatusCode != 0 {
-		t.Errorf("After batch 2: expected status_code 0 (parent Unset), got %d", after2.StatusCode)
+	if after2.StatusCode != 2 {
+		t.Errorf("After batch 2: expected status_code 2 (max of Error=2, Unset=0), got %d", after2.StatusCode)
 	}
 }
 
@@ -505,7 +505,7 @@ func TestInsertTrace_ParentsDiffer(t *testing.T) {
 		t.Fatalf("Failed to get trace: %v", err)
 	}
 
-	// Operation/Service/Status from earliest
+	// Operation/Service from earliest, status from max()
 	if retrieved.OperationName != "earlier-op" {
 		t.Errorf("Expected operation_name 'earlier-op', got %q", retrieved.OperationName)
 	}

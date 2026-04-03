@@ -107,7 +107,8 @@ func (ts *TracesStore) InsertTrace(ctx context.Context, trace *Trace) error {
 
 	// Update trace summary
 	// - local root: parent_span_id NULL or not delivered; earliest wins)
-	// - operation_name, service_name, status_code: from local root
+	// - operation_name, service_name: from local root
+	// - status_code: max across all spans, Unset (0) < Ok (1) < Error (2)
 	_, err = tx.ExecContext(ctx, `
 		WITH local_root AS (
 			SELECT s.operation_name, s.service_name, s.status_code
@@ -121,9 +122,9 @@ func (ts *TracesStore) InsertTrace(ctx context.Context, trace *Trace) error {
 		UPDATE traces SET
 			operation_name = COALESCE((SELECT operation_name FROM local_root), operation_name),
 			service_name = COALESCE((SELECT service_name FROM local_root), service_name),
-			status_code = COALESCE((SELECT status_code FROM local_root), status_code)
+			status_code = COALESCE((SELECT max(s.status_code) FROM spans s WHERE s.trace_id = ?), status_code)
 		WHERE trace_id = ?
-	`, trace.TraceID, trace.TraceID, trace.TraceID)
+	`, trace.TraceID, trace.TraceID, trace.TraceID, trace.TraceID)
 	if err != nil {
 		return fmt.Errorf("failed to update trace summary from spans: %w", err)
 	}
